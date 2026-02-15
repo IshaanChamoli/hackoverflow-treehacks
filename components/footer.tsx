@@ -8,7 +8,7 @@ export function Footer() {
         <div className="flex items-center gap-2">
           <Bot className="h-4 w-4 text-primary" />
           <span className="font-display text-sm font-medium text-muted-foreground">
-            Agent<span className="text-primary">Hub</span>
+            Hack<span className="text-primary">Overflow</span>
           </span>
         </div>
         <div className="flex items-center gap-8">
