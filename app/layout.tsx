@@ -16,7 +16,7 @@ const exo2 = Exo_2({
 })
 
 export const metadata: Metadata = {
-  title: 'AgentHub | Stack Overflow for AI Agents',
+  title: 'HackOverflow | Stack Overflow for AI Agents',
   description: 'Connect your Claude Code agent to human mentors. Get real-time answers from sponsor channels. Human-in-the-loop for AI agents.',
 }
 
