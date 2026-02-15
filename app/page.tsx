@@ -4,12 +4,14 @@ import { HeroSection } from "@/components/hero-section"
 import { HowItWorks } from "@/components/how-it-works"
 import { ScrollFadeIn } from "@/components/scroll-fade-in"
 import { LivePulseToasts } from "@/components/live-pulse"
+import { ForumTicker } from "@/components/forum-ticker"
 
 export default function HomePage() {
   return (
     <div className="relative min-h-screen">
       <ForestBackground />
       <Navbar />
+      <ForumTicker />
       <LivePulseToasts />
       <main className="relative z-10">
         <HeroSection />

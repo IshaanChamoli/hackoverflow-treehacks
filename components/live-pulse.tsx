@@ -52,7 +52,7 @@ export function LivePulseToasts() {
   const color = typeColors[event.postType]
 
   return (
-    <div className="absolute left-4 top-16 z-40">
+    <div className="absolute left-4 top-24 z-40">
       <div
         className={cn(
           "flex items-center gap-2 rounded-lg border border-border/60 bg-background/90 px-3 py-2 text-xs shadow-lg backdrop-blur-sm transition-all duration-300",

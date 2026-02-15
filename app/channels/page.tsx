@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Hash, Search, TreePine } from "lucide-react"
+import { useState, useEffect, useCallback } from "react"
+import { Hash, Search, TreePine, Pin } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Navbar } from "@/components/navbar"
 import { ForestBackground } from "@/components/forest-background"
@@ -20,6 +20,15 @@ const sortTabs = [
   { id: "newest", label: "Newest" },
 ]
 
+const extraForums: Forum[] = [
+  { id: "extra-vercel", name: "Vercel", description: "Vercel: frontend cloud, Next.js deployments, and edge functions.", question_count: 3 },
+  { id: "extra-perplexity", name: "Perplexity", description: "Perplexity: AI-powered search, APIs, and integrations.", question_count: 2 },
+  { id: "extra-browserbase", name: "Browserbase", description: "Browserbase: headless browser infrastructure for AI agents.", question_count: 1 },
+  { id: "extra-cursor", name: "Cursor", description: "Cursor: AI-first code editor, extensions, and workflows.", question_count: 4 },
+  { id: "extra-cloudflare", name: "Cloudflare", description: "Cloudflare: Workers, Pages, R2, and edge computing.", question_count: 2 },
+  { id: "extra-cerebras", name: "Cerebras", description: "Cerebras: wafer-scale inference, fast LLM serving, and AI accelerators.", question_count: 3 },
+]
+
 export default function FeedPage() {
   const [forums, setForums] = useState<Forum[]>([])
   const [activeForum, setActiveForum] = useState<string>("all")
@@ -30,12 +39,28 @@ export default function FeedPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [loading, setLoading] = useState(true)
   const [totalQuestions, setTotalQuestions] = useState(0)
+  const [pinnedForumIds, setPinnedForumIds] = useState<string[]>(() => {
+    if (typeof window === "undefined") return []
+    try {
+      return JSON.parse(localStorage.getItem("pinnedForums") || "[]")
+    } catch { return [] }
+  })
+
+  const togglePin = useCallback((forumId: string) => {
+    setPinnedForumIds((prev) => {
+      const next = prev.includes(forumId)
+        ? prev.filter((id) => id !== forumId)
+        : [...prev, forumId]
+      localStorage.setItem("pinnedForums", JSON.stringify(next))
+      return next
+    })
+  }, [])
 
   // Fetch forums
   useEffect(() => {
     fetch("/api/forums")
       .then((r) => r.json())
-      .then(setForums)
+      .then((fetched: Forum[]) => setForums([...fetched, ...extraForums]))
       .catch(console.error)
   }, [])
 
@@ -117,22 +142,46 @@ export default function FeedPage() {
                 <h2 className="mb-1.5 mt-3 px-2 font-mono text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
                   Forums
                 </h2>
-                <div className="max-h-[320px] overflow-y-auto">
-                  {forums.map((forum) => (
-                    <button
-                      key={forum.id}
-                      onClick={() => { setActiveForum(forum.id); setSearchQuery("") }}
-                      className={cn(
-                        "flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm transition-colors",
-                        activeForum === forum.id
-                          ? "bg-primary/10 text-primary font-medium"
-                          : "text-muted-foreground hover:bg-secondary hover:text-foreground"
-                      )}
-                    >
-                      <span className="truncate text-xs">h/{forum.name.toLowerCase()}</span>
-                      <span className="ml-auto font-mono text-[10px] opacity-70">{forum.question_count}</span>
-                    </button>
-                  ))}
+                <div>
+                  {[...forums]
+                    .sort((a, b) => {
+                      const ap = pinnedForumIds.includes(a.id) ? 0 : 1
+                      const bp = pinnedForumIds.includes(b.id) ? 0 : 1
+                      return ap - bp
+                    })
+                    .map((forum) => {
+                      const isPinned = pinnedForumIds.includes(forum.id)
+                      return (
+                        <button
+                          key={forum.id}
+                          onClick={() => { setActiveForum(forum.id); setSearchQuery("") }}
+                          className={cn(
+                            "group flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm transition-colors",
+                            activeForum === forum.id
+                              ? "bg-primary/10 text-primary font-medium"
+                              : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                          )}
+                        >
+                          <span className="truncate text-xs">h/{forum.name.toLowerCase()}</span>
+                          <span className="ml-auto flex items-center gap-1.5">
+                            <span
+                              onClick={(e) => { e.stopPropagation(); togglePin(forum.id) }}
+                              role="button"
+                              aria-label={isPinned ? "Unpin forum" : "Pin forum"}
+                              className={cn(
+                                "cursor-pointer transition-opacity hover:text-primary",
+                                isPinned
+                                  ? "text-primary/60 opacity-100"
+                                  : "opacity-0 text-muted-foreground group-hover:opacity-40"
+                              )}
+                            >
+                              <Pin className="h-2.5 w-2.5" />
+                            </span>
+                            <span className="font-mono text-[10px] opacity-70">{forum.question_count}</span>
+                          </span>
+                        </button>
+                      )
+                    })}
                 </div>
               </div>
             </div>
